@@ -18,10 +18,10 @@ exports.emailCampaign = async (req, res) => {
         campaigns = campaignsToRun(campaigns);
 
         for (let campaign of campaigns) {
-            let view = "First Lines";
+            let view = "Email";
 
             if ("Tag" in campaign) {
-                view = `First Lines - ${campaign.Tag}`;
+                view = `Email - ${campaign.Tag}`;
             }
 
             const contacts = await Airtable.getContacts(campaign["Base ID"], view);
