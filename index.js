@@ -8,6 +8,8 @@ const HighlevelApi = require("./src/Highlevel");
 
 const Airtable = new AirtableApi(process.env.AIRTABLE_API_KEY);
 
+const slackNotification = require("./src/slackNotification");
+
 const { liveCampaigns, campaignsToRun, campaignsDueToday } = require("./src/helpers");
 
 exports.emailCampaign = async (req, res) => {
@@ -71,6 +73,8 @@ exports.emailCampaign = async (req, res) => {
                 }
             }
         }
+
+        await slackNotification("Emails were sent for campaigns in *view=Email - HL*.");
 
         res.status(200).send(campaigns);
     } catch (error) {
