@@ -36,11 +36,11 @@ module.exports = class AirtableApi {
         }
     }
 
-    async getCampaigns() {
+    async getCampaigns(baseID, view) {
         try {
-            const base = await this.assignAirtable("appGB7S9Wknu6MiQb");
+            const base = await this.assignAirtable(baseID);
 
-            const res = await base("Campaigns").select({ view: "Email - HL" }).all();
+            const res = await base("Campaigns").select({ view }).all();
 
             const campaigns = res.map((campaign) => {
                 return {

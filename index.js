@@ -5,70 +5,68 @@ const today = moment(new Date()).format("MM/DD/YYYY");
 
 const AirtableApi = require("./src/Airtable");
 const HighlevelApi = require("./src/Highlevel");
+const HelperApi = require("./src/Helpers");
 
 const Airtable = new AirtableApi(process.env.AIRTABLE_API_KEY);
+const _ = new HelperApi();
 
 const slackNotification = require("./src/slackNotification");
 
-const { liveCampaigns, campaignsToRun, campaignsDueToday } = require("./src/helpers");
-
 exports.emailCampaign = async (req, res) => {
     try {
-        const getCampaigns = await Airtable.getCampaigns();
-        let campaigns = liveCampaigns(getCampaigns);
-        campaigns = campaignsDueToday(campaigns);
-        campaigns = campaignsToRun(campaigns);
+        const getCampaigns = await Airtable.getCampaigns("appGB7S9Wknu6MiQb", "Email - HL");
+        let accounts = _.accountsToRun(getCampaigns);
 
-        for (let campaign of campaigns) {
+        for (let account of accounts) {
             let view = "Email";
 
-            if ("Tag" in campaign) {
-                view = `Email - ${campaign.Tag}`;
+            if ("Tag" in account) {
+                view = `Email - ${account.Tag}`;
             }
 
-            const contacts = await Airtable.getContacts(campaign["Base ID"], view);
+            const contacts = await Airtable.getContacts(account["Base ID"], view);
 
             if (contacts) {
-                const Highlevel = new HighlevelApi(campaign["API Token"]);
+                const Highlevel = new HighlevelApi(account["API Token"]);
 
                 for (let contact of contacts) {
                     const hlContact = await Highlevel.makeHighlevelContact(contact);
 
                     const addedContact = await Highlevel.outreachContact(
                         hlContact,
-                        campaign["Campaign ID"]
+                        account["Campaign ID"]
                     );
 
                     if (addedContact) {
-                        await Airtable.updateCampaign(campaign.recordID, { "Last Updated": today });
+                        await Airtable.updateCampaign(account.recordID, { "Last Updated": today });
 
                         const updatedFields = {
                             "In Campaign": true,
-                            Campaign: campaign.Campaign,
+                            Campaign: account.Campaign,
                         };
                         await Airtable.updateContact(
-                            campaign["Base ID"],
+                            account["Base ID"],
                             contact.recordID,
                             updatedFields
                         );
 
                         console.log(
-                            `Client: ${campaign.Client} | Campaign: ${campaign.Campaign} - SUCCESS`
+                            `Client: ${account.Client} | Campaign: ${account.Campaign} - SUCCESS`
                         );
                     }
                 }
             } else {
                 // check if need more contacts
-                const prospects = await Airtable.hasProspects(campaign["Base ID"], view);
+                const prospects = await Airtable.hasProspects(account["Base ID"], view);
 
                 if (!prospects) {
-                    await Airtable.updateCampaign(campaign.recordID, {
+                    await Airtable.updateCampaign(account.recordID, {
                         "Campaign Status": "Need More Contacts",
                         "Last Updated": today,
                     });
 
                     console.log(
-                        `Client: ${campaign.Client} | Campaign: ${campaign.Campaign} - Need More Contacts`
+                        `Client: ${account.Client} | Campaign: ${account.Campaign} - Need More Contacts`
                     );
                 }
             }
@@ -76,7 +74,7 @@ exports.emailCampaign = async (req, res) => {
 
         await slackNotification("Emails were sent for campaigns in *view=Email - HL*.");
 
-        res.status(200).send(campaigns);
+        res.status(200).send(accounts);
     } catch (error) {
         res.status(500).send(error);
 

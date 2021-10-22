@@ -8,3 +8,5 @@
 // return true or false depending on outcome
 
 // with response of all async functions, loop over and update AT clients
+
+// TODO: Promise.all() adding prospects to HL

@@ -1,12 +1,12 @@
 const moment = require("moment");
 const today = moment(new Date()).format("YYYY-MM-DD");
 
-module.exports = {
+module.exports = class HelperApi {
     async minutesWait(minutes) {
         return await new Promise((resolve) => {
             setTimeout(resolve, 60000 * minutes);
         });
-    },
+    }
 
     liveCampaigns(campaigns) {
         return campaigns.filter((campaign) => {
@@ -24,7 +24,7 @@ module.exports = {
                 }
             }
         });
-    },
+    }
 
     campaignsDueToday(campaigns) {
         return campaigns.filter((campaign) => {
@@ -36,63 +36,7 @@ module.exports = {
                 return campaign;
             }
         });
-    },
-
-    // campaignsToRun(campaigns) {
-    //     let activeCampaigns = [];
-
-    //     let clients = campaigns.map((campaign) => campaign.Client);
-
-    //     let individualClients = new Set(clients);
-
-    //     individualClients.forEach((client) => {
-    //         // new array of client's campaigns
-    //         const clientCampaigns = campaigns.filter((campaign) => campaign.Client === client);
-
-    //         // add campaign if only one
-    //         if (clientCampaigns.length < 2) {
-    //             activeCampaigns.push(clientCampaigns[0]);
-    //         } else {
-    //             // add Type === "Specific" campaigns
-    //             clientCampaigns.forEach((campaign) => {
-    //                 if ("Type" in campaign && campaign.Type === "Specific") {
-    //                     activeCampaigns.push(campaign);
-    //                 }
-    //             });
-
-    //             // campaigns without tag
-    //             let alternateCampaigns = clientCampaigns.filter((campaign) => {
-    //                 if (!("Tag" in campaign)) {
-    //                     return campaign;
-    //                 }
-    //             });
-
-    //             // campaigns with tag
-    //             let alternateCampaignTags = clientCampaigns.filter((campaign) => {
-    //                 if ("Tag" in campaign && !("Type" in campaign)) {
-    //                     return campaign;
-    //                 }
-    //             });
-
-    //             // !!IMPORTANT - need to check if "Last Update" is empty and add that campaign
-
-    //             // add campaign with furthest date
-    //             const [nextCampaign] = alternateCampaigns.sort(
-    //                 (a, b) => new Date(a["Last Updated"]) - new Date(b["Last Updated"])
-    //             );
-
-    //             // add campaign with furthest date
-    //             const [nextCampaignTag] = alternateCampaignTags.sort(
-    //                 (a, b) => new Date(a["Last Updated"]) - new Date(b["Last Updated"])
-    //             );
-
-    //             nextCampaign && activeCampaigns.push(nextCampaign);
-    //             nextCampaignTag && activeCampaigns.push(nextCampaignTag);
-    //         }
-    //     });
-
-    //     return activeCampaigns;
-    // },
+    }
 
     campaignsToRun(campaigns) {
         let emailCampaigns = [];
@@ -137,7 +81,7 @@ module.exports = {
         });
 
         return emailCampaigns;
-    },
+    }
 
     mapContact(contacts) {
         return contacts.map((contact) => {
@@ -157,5 +101,42 @@ module.exports = {
                 },
             };
         });
-    },
+    }
+
+    sortByKeyString(array, key) {
+        return array.sort((a, b) => (a[key] > b[key] ? 1 : b[key] > a[key] ? -1 : 0));
+    }
+
+    accountsToRun(campaigns) {
+        let accounts = [];
+
+        let liveCampaigns = this.liveCampaigns(campaigns);
+        let todayCampaigns = this.campaignsDueToday(liveCampaigns);
+
+        todayCampaigns = todayCampaigns.sort(
+            (a, b) => new Date(a["Last Updated"]) - new Date(b["Last Updated"])
+        );
+
+        for (let todayCampaign of todayCampaigns) {
+            if (!("Last Updated" in todayCampaign)) {
+                accounts.push(todayCampaign);
+            }
+        }
+
+        let accountNames = [...new Set(todayCampaigns.map((el) => el.Account))];
+
+        for (let accountName of accountNames) {
+            const foundAccount = todayCampaigns.find((el) => el.Account === accountName);
+
+            const accountInAccounts = accounts.find((el) => el.Account === accountName);
+
+            if (!accountInAccounts) {
+                accounts.push(foundAccount);
+            }
+        }
+
+        accounts = this.sortByKeyString(accounts, "Account");
+
+        return accounts;
+    }
 };
