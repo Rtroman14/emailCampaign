@@ -83,7 +83,7 @@ module.exports = class AirtableApi {
 
             const res = await base("Prospects")
                 .select({
-                    maxRecords: 3,
+                    maxRecords: 20,
                     // filterByFormula: "({Mailshake Ready} = 1)",
                     view,
                 })

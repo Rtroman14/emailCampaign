@@ -58,7 +58,7 @@ module.exports = async (account) => {
 
                 await slackNotification(
                     process.env.SLACK_EMAIL_NOTIFICATIONS,
-                    `Account: *${account.Account}* | Status: *Need More Contacts*`
+                    `Account: *${account.Account}* | Campaign: ${account.Campaign} | Status: *Need More Contacts*`
                 );
 
                 return {
