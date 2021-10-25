@@ -29,8 +29,7 @@ exports.emailCampaign = async (req, res) => {
 
         res.status(200).send(results);
     } catch (error) {
-        res.status(500).send(error);
-
         console.log("EMAILCAMPAIGN ---", error);
+        res.status(500).send(error);
     }
 };
