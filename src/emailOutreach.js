@@ -1,16 +1,11 @@
 require("dotenv").config();
 
-const moment = require("moment");
-const today = moment(new Date()).format("MM/DD/YYYY");
-
 const slackNotification = require("./slackNotification");
 
 const AirtableApi = require("./Airtable");
 const HighlevelApi = require("./Highlevel");
-const HelperApi = require("./Helpers");
 
 const Airtable = new AirtableApi(process.env.AIRTABLE_API_KEY);
-const _ = new HelperApi();
 
 module.exports = async (account) => {
     let view = "Email";
@@ -43,17 +38,13 @@ module.exports = async (account) => {
                         contact.recordID,
                         updatedFields
                     );
-
-                    console.log(
-                        `Account: ${account.Account} | Campaign: ${account.Campaign} - SUCCESS`
-                    );
                 }
             }
 
-            // await slackNotification("Emails were sent for campaigns in *view=Email - HL*.");
+            console.log(`Account: ${account.Account} | Campaign: ${account.Campaign} - SUCCESS`);
 
             return {
-                recordID: account.recordID,
+                ...account,
                 status: "Live",
             };
         } else {
@@ -61,19 +52,33 @@ module.exports = async (account) => {
             const prospects = await Airtable.hasProspects(account["Base ID"], view);
 
             if (!prospects) {
+                console.log(
+                    `Account: ${account.Account} | Campaign: ${account.Campaign} - Need More Contacts`
+                );
+
+                await slackNotification(
+                    process.env.SLACK_EMAIL_NOTIFICATIONS,
+                    `Account: *${account.Account}* | Status: *Need More Contacts*`
+                );
+
                 return {
-                    recordID: account.recordID,
+                    ...account,
                     status: "Need More Contacts",
                 };
             }
         }
     } catch (error) {
-        // await slackNotification(`Error sending emails - ${error}`);
+        await slackNotification(
+            process.env.SLACK_TWO_PERCENT,
+            `Account: ${account.Account} threw an error: ${error.message}`
+        );
+
+        console.log(`Account: ${account.Account} | Campaign: ${account.Campaign} - ERROR`);
 
         console.log("EMAILCAMPAIGN ---", error);
 
         return {
-            recordID: account.recordID,
+            ...account,
             status: "Error",
         };
     }

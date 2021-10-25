@@ -2,9 +2,9 @@ require("dotenv").config();
 
 const axios = require("axios");
 
-module.exports = async (text) => {
+module.exports = async (channel, text) => {
     // notify me about this in Slack
-    await axios.post(process.env.SLACK_EMAIL_NOTIFICATIONS, {
+    await axios.post(channel, {
         text,
     });
 };

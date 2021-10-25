@@ -36,9 +36,9 @@ module.exports = class AirtableApi {
         }
     }
 
-    async getCampaigns(baseID, view) {
+    async getCampaigns(view) {
         try {
-            const base = await this.assignAirtable(baseID);
+            const base = await this.assignAirtable("appGB7S9Wknu6MiQb");
 
             const res = await base("Campaigns").select({ view }).all();
 
@@ -83,7 +83,7 @@ module.exports = class AirtableApi {
 
             const res = await base("Prospects")
                 .select({
-                    maxRecords: 20,
+                    maxRecords: 3,
                     // filterByFormula: "({Mailshake Ready} = 1)",
                     view,
                 })
