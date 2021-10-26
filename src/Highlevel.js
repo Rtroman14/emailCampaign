@@ -122,7 +122,7 @@ module.exports = class HighlevelApi {
             if (contact) {
                 const res = await this.addToCampaign(contact.id, campaignID);
 
-                return res;
+                return { ...contact, ...res };
             }
 
             return false;

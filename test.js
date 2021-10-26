@@ -18,26 +18,18 @@ const emailOutreach = require("./src/emailOutreach");
         const getCampaigns = await Airtable.getCampaigns("Email - HL");
         let accounts = _.accountsToRun(getCampaigns);
 
-        // accounts = accounts.filter(
-        //     (account) =>
-        //         account.Account === "Red Leaf Solutions" ||
-        //         account.Account === "Roper Roofing" ||
-        //         account.Account === "Summa Media" ||
-        //         account.Account === "Valley Hill Roofing" ||
-        //         account.Account === "XL Roofing" ||
-        //         account.Account === "Splashtacular"
-        // );
+        accounts = accounts.filter((account) => account.Account === "Summa Media");
 
         const arrayEmailOutreach = accounts.map((account) => emailOutreach(account));
 
         const results = await Promise.all(arrayEmailOutreach);
 
-        for (let result of results) {
-            await Airtable.updateCampaign(result.recordID, {
-                "Campaign Status": result.status,
-                "Last Updated": today,
-            });
-        }
+        // for (let result of results) {
+        //     await Airtable.updateCampaign(result.recordID, {
+        //         "Campaign Status": result.status,
+        //         "Last Updated": today,
+        //     });
+        // }
     } catch (error) {
         console.log(error);
     }
