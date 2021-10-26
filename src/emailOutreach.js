@@ -38,6 +38,13 @@ module.exports = async (account) => {
                         contact.recordID,
                         updatedFields
                     );
+
+                    if (account.Client === "Greenscape") {
+                        await axios.post(
+                            "https://greenscape.netlify.app/.netlify/functions/addToPipedrive",
+                            hlContact
+                        );
+                    }
                 }
             }
 

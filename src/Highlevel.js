@@ -185,10 +185,10 @@ module.exports = class HighlevelApi {
         return {
             firstName: contact["First Name"] || "",
             lastName: contact["Last Name"] || "",
-            name: contact["Full Name"],
+            name: `${contact["First Name"]} ${contact["Last Name"]}`,
             email: contact.Email || "",
             phone: contact["Phone Number"] || "",
-            address1: contact.Address || "",
+            address1: contact.Street || "",
             city: contact.City || "",
             state: contact.State || "",
             postalCode: contact.Zip || "",
