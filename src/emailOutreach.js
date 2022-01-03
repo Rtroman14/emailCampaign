@@ -34,7 +34,7 @@ module.exports = async (account) => {
                     const updatedFields = {
                         "In Campaign": true,
                         Campaign: account.Campaign,
-                        "Highlevel ID": addedContact.id,
+                        id: addedContact.id,
                     };
                     await Airtable.updateContact(
                         account["Base ID"],
