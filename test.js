@@ -15,21 +15,15 @@ const emailOutreach = require("./src/emailOutreach");
 
 (async () => {
     try {
-        const getCampaigns = await Airtable.getCampaigns("Email - HL");
-        let accounts = _.accountsToRun(getCampaigns);
+        const contacts = await Airtable.getContacts("appRgFWQja3Z8rqLi", "Email - apartments");
 
-        accounts = accounts.filter((account) => account.Account === "Summa Media");
+        const Highlevel = new HighlevelApi(
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2NhdGlvbl9pZCI6Ik9xYnVEdVBZa2hyRWVrVG5LMVRnIiwiY29tcGFueV9pZCI6InVGeWhOME0wVVFMNTYzdFRWblo5IiwidmVyc2lvbiI6MSwiaWF0IjoxNjUxMDY4ODMyMTYzLCJzdWIiOiJHY3kyZktScFhLRVB3N0ZDOGFXTyJ9.tA8C2P4bLQFdUoljTzNMcy0-kft8vsC2CFvQZzw6wvc"
+        );
 
-        const arrayEmailOutreach = accounts.map((account) => emailOutreach(account));
+        const hlContact = await Highlevel.makeHighlevelContact(contacts[0]);
 
-        const results = await Promise.all(arrayEmailOutreach);
-
-        // for (let result of results) {
-        //     await Airtable.updateCampaign(result.recordID, {
-        //         "Campaign Status": result.status,
-        //         "Last Updated": today,
-        //     });
-        // }
+        console.log(hlContact);
     } catch (error) {
         console.log(error);
     }

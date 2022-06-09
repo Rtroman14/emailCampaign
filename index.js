@@ -16,7 +16,7 @@ exports.emailCampaign = async (req, res) => {
         const getCampaigns = await Airtable.getCampaigns("Email - HL");
         let accounts = _.accountsToRun(getCampaigns);
 
-        // accounts = accounts.filter((acc) => acc.Account === "Roman Roofing");
+        accounts = accounts.filter((acc) => acc.Account === "PeakLeads.io");
 
         const arrayEmailOutreach = accounts.map((account) => emailOutreach(account));
 

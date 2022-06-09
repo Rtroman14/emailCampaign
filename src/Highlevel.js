@@ -173,12 +173,22 @@ module.exports = class HighlevelApi {
 
     async makeHighlevelContact(contact) {
         const firstLineField = await this.getCustomeFields("First Line");
+        const propertyField = await this.getCustomeFields("Property");
 
         let firstLine = {};
+        let property = {};
+        let customField = {};
 
         if (firstLineField) {
             if ("First Line" in contact) {
                 firstLine = { [firstLineField.id]: contact["First Line"] };
+                customField = { ...customField, ...firstLine };
+            }
+        }
+        if (propertyField) {
+            if ("Property" in contact) {
+                property = { [propertyField.id]: contact.Property };
+                customField = { ...customField, ...property };
             }
         }
 
@@ -192,7 +202,7 @@ module.exports = class HighlevelApi {
             city: contact.City || "",
             state: contact.State || "",
             postalCode: contact.Zip || "",
-            customField: firstLine,
+            customField,
         };
     }
 };
